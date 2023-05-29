@@ -4,15 +4,21 @@
 	
 	$: b_repr = f2b(val_val);
 	
-	let imp_b = 0;
+	$: imp_b = b_repr.exponent == '00000000'? '0' : '1';
+
 	let mts_val = 0.0;
-	
+	let apx_val = 0.0;
+
 	$: {
-		imp_b = b_repr.exponent == '00000000'? '0' : '1';
-		let bdvl = imp_b + '.' + b_repr.mantissa;
-		
+		const bdvl = imp_b + '.' + b_repr.mantissa;
 		mts_val = norm_b2d(bdvl);
-	}
+
+        const sign = b_repr.sign == '1' ? -1 : 1;
+        const expv = b_repr.exponent == '00000000' ? -126 : parseInt(b_repr.exponent, 2) - 127
+        apx_val = sign * Math.pow(2, expv) * mts_val;
+    }
+
+    $: console.log(f2b(val_val));
 	
 	function f2b(val) {
     const f32repr = new Float32Array([val]);
@@ -64,11 +70,12 @@
 	}
 </script>
 
-{@debug input_val}
-
 <div>
+    <h1>
+        <code>float32</code>
+    </h1>
 	<div width="100%">
-		<input type="text" id="input" bind:value={input_val} placeholder="Insert float here...">
+		<input type="text" id="input" bind:value={input_val} placeholder="Insert float here..." style="width: 100%;">
 	</div>
 	
 	<h2>Binary: <code>{b_repr.binary}</code></h2>
@@ -79,7 +86,7 @@
 			<p>{b_repr.sign}</p>
 			</div>
 			<strong>
-				{b_repr.sign === '0' ? '+' : '-'}
+				{b_repr.sign == '0' ? '+' : '-'}
 			</strong>
 		</div>
 		
@@ -105,22 +112,48 @@
 				{/each}
 			</div>
 			<strong>
-				{imp_b} + {norm_b2d('0.' + b_repr.mantissa)}
+                {imp_b} + {norm_b2d('0.' + b_repr.mantissa)}
+                {#if imp_b == '0' && b_repr.mantissa.includes('1')}
+                    <small>(Denormal)</small>
+                {/if}
 			</strong>
 		</div>
 	</div>
 	<h2>
 		<span>
-			{b_repr.sign === '0' ? 1 : -1}
+			{b_repr.sign == '0' ? 1 : -1}
 		</span>
 		&times;
 		<span>
-			2<sup>{Math.abs(val_val) === 0 ? -126 : parseInt(b_repr.exponent, 2) - 127}</sup>
+			2<sup>{b_repr.exponent == '00000000' ? -126 : parseInt(b_repr.exponent, 2) - 127}</sup>
 		</span>
 		&times;
 		{mts_val}
-		= {val_val}
+		&equals;
+        {#if b_repr.exponent != '11111111'}
+            {apx_val}
+        {:else if b_repr.mantissa.includes('1')}
+            NaN
+        {:else}
+            {#if b_repr.sign == '1'}
+                &minus;
+            {/if}
+            &infin;
+        {/if}
 	</h2>
+    <h2>
+        &Delta; &equals;
+        {#if b_repr.exponent != '11111111'}
+            {Math.abs(apx_val - val_val).toFixed(12)} ({(Math.abs(apx_val - val_val) / (Math.abs(val_val) === 0 ? 1 : val_val)).toFixed(12)} &percnt;)
+        {:else if b_repr.mantissa.includes('1')}
+            Not Applicable
+        {:else}
+            {#if b_repr.sign == '1'}
+                &minus;
+            {/if}
+            &infin;
+        {/if}
+    </h2>
 </div>
 
 <style>
@@ -138,6 +171,7 @@
 	}
 	.output-container {
 		display: flex;
+        flex-wrap: wrap;
 	}
 	.bit {
 		border: 1px solid;
