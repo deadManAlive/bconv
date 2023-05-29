@@ -42,7 +42,7 @@ jobs:
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "public${{ steps.pages.outputs.base_path }}"
+          path: "public"
 
   deploy:
     environment:
