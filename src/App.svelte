@@ -1,5 +1,9 @@
 <script>
+    import {norm_b2d, f2b, b2f} from './func';
+
 	let input_val = 0.0;
+    let val_arr = [];
+
 	$: val_val = input_val === null ? '0' : input_val;
 	
 	$: b_repr = f2b(val_val);
@@ -14,60 +18,22 @@
 		mts_val = norm_b2d(bdvl);
 
         const sign = b_repr.sign == '1' ? -1 : 1;
-        const expv = b_repr.exponent == '00000000' ? -126 : parseInt(b_repr.exponent, 2) - 127
+        const expv = b_repr.exponent == '00000000' ? -126 : parseInt(b_repr.exponent, 2) - 127;
         apx_val = sign * Math.pow(2, expv) * mts_val;
+
+        val_arr = [...f2b(val_val).binary];
     }
 
-    $: console.log(f2b(val_val));
-	
-	function f2b(val) {
-    const f32repr = new Float32Array([val]);
-    const u32repr = new Uint32Array(f32repr.buffer);
-  
-    let qtn = u32repr[0];
-    let res = "";
-    while(true) {
-        let rem = qtn % 2;
-        res += rem;
-
-        qtn = Math.floor(qtn / 2);
-  
-        if (qtn < 1) {
-            break;
-        }
+    $: console.log(val_arr.join(""), b2f(val_arr.join("")));
+    
+    /**
+     * 
+     * @param {number} idx
+     * @param {function(string):string} modifier
+     */
+    function arrayMod(idx, modifier) {
+        val_arr[idx] = modifier(val_arr[idx]);
     }
-
-    while (res.length < 32) {
-        res += "0";
-    }
-
-    res =  res.split("").reverse().join("");
-		
-		return {
-			binary: res,
-			sign: res[0],
-			exponent: res.slice(1,9),
-			mantissa: res.slice(9)
-		};
-	}
-	
-	function norm_b2d(val) {
-		const valarr = val.split(".");
-
-		const dec = parseInt(valarr[0], 2);
-		if (dec > 1) {
-			throw new Error("This function only works for normalized value!");
-		}
-
-		const dval = valarr.join("");
-		let res = 0;
-
-		for(let i = 0; i < dval.length; i++) {
-			res += (+dval[i]) * Math.pow(2, -i);
-		}
-
-		return res;
-	}
 </script>
 
 <div>
@@ -81,9 +47,10 @@
 	<h2>Binary: <code>{b_repr.binary}</code></h2>
 	<div class="output-container">
 		
-		<div id="sign-container">
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<div id="sign-container" on:click={e => arrayMod(0, (s) => {return s == '1' ? '0' : '1';})}>
 			<div class = "bit" id="sign">
-			<p>{b_repr.sign}</p>
+			<code>{b_repr.sign}</code>
 			</div>
 			<strong>
 				{b_repr.sign == '0' ? '+' : '-'}
@@ -94,7 +61,7 @@
 			<div class="bit-container">
 				{#each b_repr.exponent as exp_bit}
 				<div class = "bit" id="exponent">
-					<p>{exp_bit}</p>
+					<code>{exp_bit}</code>
 				</div>
 			{/each}
 			</div>
@@ -107,7 +74,7 @@
 			<div class="bit-container">
 				{#each b_repr.mantissa as mts_bit}
 					<div class = "bit" id="mantissa">
-						<p>{mts_bit}</p>
+						<code>{mts_bit}</code>
 					</div>
 				{/each}
 			</div>
@@ -157,14 +124,26 @@
 </div>
 
 <style>
+    #sign, #exponent, #mantissa {
+        cursor: pointer;
+    }
 	#sign {
 		background-color: #c5fcff;
 	}
+    #sign:hover{
+        background-color: #00d6e2;
+    }
 	#exponent {
 		background-color: #9fffad;
 	}
+    #exponent:hover {
+		background-color: #00cf1e;
+	}
 	#mantissa {
 		background-color: #ffaead;
+	}
+    #mantissa:hover {
+		background-color: #d60300;
 	}
 	#input {
 		width: 50%;
@@ -177,6 +156,9 @@
 		border: 1px solid;
 		margin: 0 1px 0 0;
 		padding: 0 4px 0 4px;
+        user-select: none;
+        height: 30px;
+        text-align: center;
 	}
 	#sign-container strong {
 		width: 100%;
@@ -187,6 +169,9 @@
 	.bit-container {
 		display: flex;
 	}
+    .bit code {
+        height: 20px;
+    }
 	.struct-div {
 		display: flex;
 		flex-direction: column;
