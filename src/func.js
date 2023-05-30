@@ -78,6 +78,5 @@ export function b2f(val) {
     const impb = expb == '00000000' ? '0' : '1';
     const mtsv = norm_b2d(impb + '.' + mtsb);
 
-
     return sign * Math.pow(2, expv) * mtsv;
 }

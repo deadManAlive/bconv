@@ -1,7 +1,7 @@
 <script>
     import {norm_b2d, f2b, b2f} from './func';
 
-	let input_val = 0.0;
+	let input_val = '0';
     let val_arr = [];
 
 	$: val_val = input_val === null ? '0' : input_val;
@@ -24,8 +24,6 @@
         val_arr = [...f2b(val_val).binary];
     }
 
-    $: console.log(val_arr.join(""), b2f(val_arr.join("")));
-    
     /**
      * 
      * @param {number} idx
@@ -33,6 +31,25 @@
      */
     function arrayMod(idx, modifier) {
         val_arr[idx] = modifier(val_arr[idx]);
+
+        // TODO: what the hell is this
+        if (val_arr.slice(1,9).join("") == '11111111' && val_arr.slice(9).join("").includes('1')) {
+            console.log("NaN");
+            imp_b = '0';
+            console.log(imp_b);
+        }
+
+        console.log(val_arr.join(""));
+
+        const itfv = b2f(val_arr.join(""))
+        
+        console.log(itfv);
+
+        if(itfv == 0) {
+            input_val = (val_arr[0] == '1' ? '-' : '') + '0';
+        } else {
+            input_val = itfv.toString();
+        }
     }
 </script>
 
@@ -59,8 +76,9 @@
 		
 		<div class="struct-div">
 			<div class="bit-container">
-				{#each b_repr.exponent as exp_bit}
-				<div class = "bit" id="exponent">
+				{#each b_repr.exponent as exp_bit, idx}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<div class = "bit" id="exponent" on:click={e => arrayMod(idx + 1, (s) => {return s == '1' ? '0' : '1';})}>
 					<code>{exp_bit}</code>
 				</div>
 			{/each}
@@ -72,8 +90,9 @@
 		
 		<div class="struct-div">
 			<div class="bit-container">
-				{#each b_repr.mantissa as mts_bit}
-					<div class = "bit" id="mantissa">
+				{#each b_repr.mantissa as mts_bit, idx}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<div class = "bit" id="mantissa" on:click={e => arrayMod(idx + 9, (s) => {return s == '1' ? '0' : '1';})}>
 						<code>{mts_bit}</code>
 					</div>
 				{/each}
@@ -171,6 +190,8 @@
 	}
     .bit code {
         height: 20px;
+        font-size: 12pt;
+        width: 20px;
     }
 	.struct-div {
 		display: flex;
