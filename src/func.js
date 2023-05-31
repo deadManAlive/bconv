@@ -1,4 +1,12 @@
 /**
+ * @typedef {Object} BinaryRepr
+ * @property {string} binary
+ * @property {string} sign
+ * @property {string} exponent
+ * @property {string} mantissa
+ */
+
+/**
     * 
     * @param {string} val
     * @returns {number}
@@ -24,7 +32,7 @@ export function norm_b2d(val) {
 /**
     * 
     * @param {number} val
-    * @returns {string}
+    * @returns {BinaryRepr}
     */
 export function f2b(val) {
     const f32repr = new Float32Array([val]);
