@@ -39,9 +39,9 @@
 
         const sign = val_arr[0] == "1" ? -1 : 1;
         const expv =
-            val_arr.slice(1,9).join("") == "00000000"
+            val_arr.slice(1, 9).join("") == "00000000"
                 ? -126
-                : parseInt(val_arr.slice(1,9).join(""), 2) - 127;
+                : parseInt(val_arr.slice(1, 9).join(""), 2) - 127;
         apx_val = sign * Math.pow(2, expv) * mts_val;
     }
 
@@ -62,10 +62,10 @@
     <h1>
         <code>float32</code>
     </h1>
-    <div width="100%">
+    <div class="input-field" width="100%">
         <input
             type="text"
-            id="input"
+            id="float-input"
             bind:value={input_val}
             placeholder="Insert float here..."
             style="width: 100%;"
@@ -96,10 +96,14 @@
             <div class="bit-container">
                 {#each val_arr.slice(1, 9) as exp_bit, idx}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <div class="bit" id="exponent" on:click={(e) =>
-                        arrayMod(idx + 1, (s) => {
-                            return s == "1" ? "0" : "1";
-                        })}>
+                    <div
+                        class="bit"
+                        id="exponent"
+                        on:click={(e) =>
+                            arrayMod(idx + 1, (s) => {
+                                return s == "1" ? "0" : "1";
+                            })}
+                    >
                         <code>{exp_bit}</code>
                     </div>
                 {/each}
@@ -113,10 +117,14 @@
             <div class="bit-container">
                 {#each val_arr.slice(9) as mts_bit, idx}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <div class="bit" id="mantissa" on:click={(e) =>
-                        arrayMod(idx + 9, (s) => {
-                            return s == "1" ? "0" : "1";
-                        })}>
+                    <div
+                        class="bit"
+                        id="mantissa"
+                        on:click={(e) =>
+                            arrayMod(idx + 9, (s) => {
+                                return s == "1" ? "0" : "1";
+                            })}
+                    >
                         <code>{mts_bit}</code>
                     </div>
                 {/each}
@@ -203,8 +211,13 @@
     #mantissa:hover {
         background-color: #d60300;
     }
-    #input {
-        width: 50%;
+    .input-field {
+        width: 100%;
+    }
+    @media screen and (min-width: 768px) {
+        .input-field {
+            width: 50%;
+        }
     }
     .output-container {
         display: flex;
