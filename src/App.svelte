@@ -1,5 +1,5 @@
 <script>
-    import { norm_b2d, f2b, b2f } from "./func";
+    import { norm_b2d, f2b, b2f, exp2dcp } from "./func";
 
     let input_val = 0.0;
     let val_arr = [...f2b(0).binary];
@@ -7,7 +7,9 @@
     let mts_val = 0.0;
     let apx_val = 0.0;
     let val_ctr = 0.0;
-    
+
+    $: dbfs = 20 * Math.log10(Math.abs(apx_val));
+
     /**
      * @description Updater, called for text input to binary processing.
      */
@@ -66,6 +68,7 @@
     <h1>
         <code>float32</code>
     </h1>
+    <hr />
     <div class="input-field" width="100%">
         <input
             type="text"
@@ -92,7 +95,11 @@
                 <code>{val_arr[0]}</code>
             </div>
             <strong>
-                {val_arr[0] == "0" ? "+" : "-"}
+                {#if val_arr[0] == "0"}
+                    &plus;
+                {:else}
+                    &minus;
+                {/if}
             </strong>
         </div>
 
@@ -145,36 +152,51 @@
             </strong>
         </div>
     </div>
+    <hr />
     <h2>
-        <span>
+        <span style="color: #00d6e2;">
             {val_arr[0] == "0" ? 1 : -1}
         </span>
         &times;
         <span>
-            2<sup
+            2<sup style="color: #00cf1e;"
                 >{val_arr.slice(1, 9).join("") == "00000000"
                     ? -126
                     : parseInt(val_arr.slice(1, 9).join(""), 2) - 127}</sup
             >
         </span>
         &times;
-        {mts_val}
+        <span style="color: #d60300;">
+            {mts_val}
+        </span>
         &equals;
-        {#if val_arr.join("") == "10000000000000000000000000000000"}
+        {#if val_arr.join("") == "00000000000000000000000000000000"}
+            0
+        {:else if val_arr.join("") == "10000000000000000000000000000000"}
             -0
         {:else if val_arr.slice(1, 9).join("") != "11111111"}
-            {apx_val}
+            {exp2dcp(apx_val.toExponential()).mantissa}
+            {#if exp2dcp(apx_val.toExponential()).exponent != 0}
+                &times; 10{#if exp2dcp(apx_val.toExponential()).exponent != 1}<sup
+                    >
+                        {exp2dcp(apx_val.toExponential()).exponent}
+                    </sup>{/if}
+            {/if}
         {:else if val_arr.slice(9).includes("1")}
             NaN
         {:else}
             {#if val_arr[0] == "1"}
-                &minus;
+                -
             {/if}
             &infin;
         {/if}
     </h2>
     <h2>
-        &Delta; &equals;
+        <span
+            title="Against numerical input, should be zero when using per bit input"
+            >&Delta;</span
+        >
+        &equals;
         {#if val_arr.slice(1, 9).join("") != "11111111"}
             {Math.abs(apx_val - val_ctr).toFixed(12)} ({(
                 Math.abs(apx_val - val_ctr) /
@@ -184,11 +206,30 @@
             Not Applicable
         {:else}
             {#if val_arr[0] == "1"}
-                &minus;
+                -
             {/if}
             &infin;
         {/if}
     </h2>
+    <h2>
+        <span title="Against normalized range of |1.0|"
+            >L<sub><small>dBFS</small></sub></span
+        >
+        = {#if apx_val == 0}
+            -&infin; dBFS
+        {:else if val_arr.slice(1, 9).join("") == "11111111"}
+            {#if val_arr.slice(9).includes("1")}
+                Not Applicable
+            {:else}
+                <span class="db-over">&infin;</span> dBFS
+            {/if}
+        {:else}
+            <span class:db-over={dbfs > 1.0}>
+                {dbfs.toFixed(3)}
+            </span> dBFS
+        {/if}
+    </h2>
+    <hr />
 </div>
 
 <style>
@@ -257,5 +298,8 @@
         margin-top: 2px;
         width: 100%;
         text-align: center;
+    }
+    .db-over {
+        color: crimson;
     }
 </style>

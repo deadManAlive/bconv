@@ -7,7 +7,13 @@
  */
 
 /**
-    * 
+ * @typedef {Object} ExpRepr
+ * @property {number} mantissa
+ * @property {number} exponent
+ */
+
+/**
+    * @description Convert fractional binary value to decimal
     * @param {string} val
     * @returns {number}
     */
@@ -30,7 +36,7 @@ export function norm_b2d(val) {
 }
 
 /**
-    * 
+    * @description Parse decimal numbers to structure of float32
     * @param {number} val
     * @returns {BinaryRepr}
     */
@@ -66,7 +72,7 @@ export function f2b(val) {
 }
 
 /**
- * 
+ * @description Convert 32bit binary data representation to a decimal float value
  * @param {string} val
  * @returns {number} 
  */
@@ -87,4 +93,25 @@ export function b2f(val) {
     const mtsv = norm_b2d(impb + '.' + mtsb);
 
     return sign * Math.pow(2, expv) * mtsv;
+}
+
+/**
+ * 
+ * @param {string} val 
+ * @returns {ExpRepr}
+ */
+export function exp2dcp(val) {
+    if (isNaN(parseFloat(val))) {
+        return {
+            mantissa: NaN,
+            exponent: NaN,
+        }
+    }
+
+    const [mts, exp] = [...val.split(/e|E/)];
+
+    return {
+        mantissa: +mts,
+        exponent: +exp ?? 0,
+    }
 }
