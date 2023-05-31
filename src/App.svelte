@@ -6,13 +6,14 @@
 
     let mts_val = 0.0;
     let apx_val = 0.0;
-
-    $: val_val = input_val === null ? "0" : input_val;
-
+    let val_ctr = 0.0;
+    
     /**
      * @description Updater, called for text input to binary processing.
      */
     function forwardConvert() {
+        const val_val = input_val ?? "0";
+        val_ctr = +val_val;
         const b_repr = f2b(val_val);
         const imp_b = b_repr.exponent == "00000000" ? "0" : "1";
         const bdvl = imp_b + "." + b_repr.mantissa;
@@ -43,6 +44,9 @@
                 ? -126
                 : parseInt(val_arr.slice(1, 9).join(""), 2) - 127;
         apx_val = sign * Math.pow(2, expv) * mts_val;
+
+        val_ctr = b2f(val_arr.join(""));
+        input_val = val_ctr.toString();
     }
 
     /**
@@ -172,9 +176,9 @@
     <h2>
         &Delta; &equals;
         {#if val_arr.slice(1, 9).join("") != "11111111"}
-            {Math.abs(apx_val - val_val).toFixed(12)} ({(
-                Math.abs(apx_val - val_val) /
-                (Math.abs(val_val) === 0 ? 1 : val_val)
+            {Math.abs(apx_val - val_ctr).toFixed(12)} ({(
+                Math.abs(apx_val - val_ctr) /
+                (Math.abs(val_ctr) === 0 ? 1 : val_ctr)
             ).toFixed(12)} &percnt;)
         {:else if val_arr.slice(9).includes("1")}
             Not Applicable
