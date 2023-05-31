@@ -229,6 +229,8 @@
     }
     .bit code {
         height: 20px;
+        font-size: 12pt;
+        width: 20px;
     }
     .struct-div {
         display: flex;
